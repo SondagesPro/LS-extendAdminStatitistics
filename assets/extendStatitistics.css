@@ -1,0 +1,13 @@
+.stackedbar-legend,
+.bar-legend {
+list-style: outside none none;
+}
+.stackedbar-legend span,
+.bar-legend span{
+    display:inline-block;
+    border-radius: 0.2em;
+    height: 1em;
+    margin: 0.1em;
+    padding: 0;
+    width: 1em;
+}
