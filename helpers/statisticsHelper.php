@@ -3870,7 +3870,31 @@ class statisticsHelper {
 
             //let's run through the survey
             $runthrough=$summary;
-
+            /* <LECTRA> */
+            if($outputType=="html")
+            {
+                /**
+                 * Construct the statisticsLectraHelper
+                 */
+                $statisticsLectraHelper=new statisticsLectraHelper($surveyid,$sLanguageCode,$sql,$outputType,$usegraph);
+                foreach($summary as $summaryCode)
+                {
+                    if(!is_numeric($summaryCode[0])){ /* @see line 3976 : the code get from LS core add a caracter at first position */
+                        $columnName=substr($summaryCode, 1);
+                    }else{
+                        $columnName=$summaryCode;
+                    }
+                    if(isset($fieldmap[$columnName]) && in_array($fieldmap[$columnName]['type'],$this->aLectraQuestionType))
+                    {
+                        if(!isset($question[$fieldmap[$columnName]['qid']]))
+                        {
+                            $question[$fieldmap[$columnName]['qid']]=array();
+                        }
+                        $question[$fieldmap[$columnName]['qid']][]=$columnName;
+                    }
+                }
+            }
+            /* </LECTRA> */
             //START Chop up fieldname and find matching questions
 
             //loop through all selected questions
@@ -3881,6 +3905,39 @@ class statisticsHelper {
                 ////Step 1: Get information about this response field (SGQA) for the summary
                 $outputs=$this->buildOutputList($rt, $language, $surveyid, $outputType, $sql, $sLanguageCode);
                 //$sOutputHTML .= $outputs['statisticsoutput']; // Nothing interesting for us in this output
+                /* <LECTRA> */
+                /**
+                 * Lectra question type behaviour
+                 */
+                if($outputType=="html" && in_array($outputs['qtype'],$this->aLectraQuestionType))
+                {
+                    if(isset($question[$outputs['parentqid']]))
+                    {
+                        $count=$count+1;
+                        if($count==1)
+                        {
+                            $sOutputHTML .= '<div class="row">';
+                            $rowOpened = 1;
+                        }
+                        //$sOutputHTML .= $outputs['statisticsoutput'];
+                        $sOutputHTML.=$statisticsLectraHelper->getSimpleHtmlStatistics($outputs['parentqid'], $question[$outputs['parentqid']],$outputs['alist']);
+                        // This question is done : we can remove it
+                        unset($question[$outputs['parentqid']]);
+                        if($count==3)
+                        {
+                            $sOutputHTML .= '</div>';
+                            $rowOpened = 0;
+                            $count=0;
+                        }
+                    }
+                }
+                /**
+                 * LimeSUrvey core behaviour
+                 */
+                else
+                {
+                /* This is the default behaviour */
+                /* </LECTRA> */
                 //2. Collect and Display results #######################################################################
                 if (isset($outputs['alist']) && $outputs['alist']) //Make sure there really is an answerlist, and if so:
                 {
@@ -3903,8 +3960,9 @@ class statisticsHelper {
                     }
 
                 }    //end if -> collect and display results
-
-
+                /* <LECTRA> */
+                }
+                /* </LECTRA> */
                 //Delete Build Outputs data
                 unset($outputs);
                 unset($display);
@@ -4118,10 +4176,10 @@ class statisticsHelper {
          */
         if (isset($summary) && $summary)
         {
+            /* <LECTRA> */
             /**
              * Get the question to put in same array/graph for lectra
              */
-
             if($outputType=="html")
             {
                 /**
@@ -4145,6 +4203,7 @@ class statisticsHelper {
                     }
                 }
             }
+            /* </LECTRA> */
             //let's run through the survey
             $runthrough=$summary;
 
@@ -4158,6 +4217,7 @@ class statisticsHelper {
                 $outputs=$this->buildOutputList($rt, $language, $surveyid, $outputType, $sql, $sLanguageCode);
                 /* fix outputs to get all */
                 $sOutputHTML .= $outputs['statisticsoutput'];
+                /* <LECTRA> */
                 /**
                  * Lectra question type behaviour
                  */
@@ -4177,6 +4237,7 @@ class statisticsHelper {
                 else
                 {
                     /* This is the default behaviour */
+                    /* </LECTRA> */
                     //2. Collect and Display results #######################################################################
                     if (isset($outputs['alist']) && $outputs['alist']) //Make sure there really is an answerlist, and if so:
                     {
@@ -4185,8 +4246,9 @@ class statisticsHelper {
                         $sOutputHTML .= $display['statisticsoutput'];
                         //$aStatisticsData = array_merge($aStatisticsData, $display['astatdata']);
                     }    //end if -> collect and display results
-
+                /* <LECTRA> */
                 }
+                /* </LECTRA> */
                 //Delete Build Outputs data
                 unset($outputs);
                 unset($display);
@@ -4536,6 +4598,31 @@ class statisticsHelper {
 
         if (isset($summary) && $summary)
         {
+            /* <LECTRA> */
+            if($outputType=="pdf")
+            {
+                /**
+                 * Construct the statisticsLectraHelper
+                 */
+                $statisticsLectraHelper=new statisticsLectraHelper($surveyid,$sLanguageCode,$sql,$outputType,$usegraph);
+                foreach($summary as $summaryCode)
+                {
+                    if(!is_numeric($summaryCode[0])){ /* @see line 3976 : the code get from LS core add a caracter at first position */
+                        $columnName=substr($summaryCode, 1);
+                    }else{
+                        $columnName=$summaryCode;
+                    }
+                    if(isset($fieldmap[$columnName]) && in_array($fieldmap[$columnName]['type'],$this->aLectraQuestionType))
+                    {
+                        if(!isset($question[$fieldmap[$columnName]['qid']]))
+                        {
+                            $question[$fieldmap[$columnName]['qid']]=array();
+                        }
+                        $question[$fieldmap[$columnName]['qid']][]=$columnName;
+                    }
+                }
+            }
+            /* </LECTRA> */
             //let's run through the survey
             $runthrough=$summary;
 
@@ -4547,6 +4634,39 @@ class statisticsHelper {
 
                 //Step 1: Get information about this response field (SGQA) for the summary
                 $outputs=$this->buildOutputList($rt, $language, $surveyid, $outputType, $sql, $sLanguageCode);
+                /* <LECTRA> */
+                /**
+                 * Lectra question type behaviour
+                 */
+                if($outputType=="pdf" && in_array($outputs['qtype'],$this->aLectraQuestionType))
+                {
+                    if(isset($question[$outputs['parentqid']]))
+                    {
+                        //$sOutputHTML .= $outputs['statisticsoutput'];
+                        //$sOutputHTML.=
+                        $aPdfData=$statisticsLectraHelper->getPdfStatistics($outputs['parentqid'], $question[$outputs['parentqid']],$outputs['alist']);
+                        $this->pdf->AddPage('P','A4');
+                        $this->pdf->Bookmark($aPdfData['subtitle'], 1, 0);
+                        $this->pdf->titleintopdf($aPdfData['title'],$aPdfData['subtitle']);
+                        $this->pdf->writeHTML($aPdfData['htmlTable'], true, false, true, false, '');
+                        if($aPdfData['graphImageName'])
+                        {
+                            $this->pdf->AddPage('P','A4');
+                            $this->pdf->titleintopdf($aPdfData['title'],$aPdfData['subtitle']);
+                            $this->pdf->Image($aPdfData['graphImageName'], 0, 70, 180, 0, '', Yii::app()->getController()->createUrl("admin/survey/sa/view/surveyid/".$surveyid), 'B', true, 150,'C',false,false,0,true);
+
+                        }
+                        // This question is done : we can remove it
+                        unset($question[$outputs['parentqid']]);
+                    }
+                }
+                /**
+                 * LimeSUrvey core behaviour
+                 */
+                else
+                {
+                /* This is the default behaviour */
+                /* </LECTRA> */
                 $sOutputHTML .= $outputs['statisticsoutput'];
                 //2. Collect and Display results #######################################################################
                 if (isset($outputs['alist']) && $outputs['alist']) //Make sure there really is an answerlist, and if so:
@@ -4555,8 +4675,9 @@ class statisticsHelper {
                     $sOutputHTML .= $display['statisticsoutput'];
                     $aStatisticsData = array_merge($aStatisticsData, $display['astatdata']);
                 }    //end if -> collect and display results
-
-
+                /* <LECTRA> */
+                }
+                /* </LECTRA> */
                 //Delete Build Outputs data
                 unset($outputs);
                 unset($display);
@@ -4794,4 +4915,32 @@ class statisticsHelper {
         return $reshtml;
     }
 
+    /**
+     * @TODO : copy pasted code for dev part: surely uneeded in next LS version, then in todo actually
+     * Call 3 times : need a function
+     * Get the questions list for LECTRA helper
+     */
+    private function getQuestionsSummaryList()
+    {
+        /**
+         * Construct the statisticsLectraHelper
+         */
+        $statisticsLectraHelper=new statisticsLectraHelper($surveyid,$sLanguageCode,$sql,$outputType,$usegraph);
+        foreach($summary as $summaryCode)
+        {
+            if(!is_numeric($summaryCode[0])){ /* @see line 3976 : the code get from LS core add a caracter at first position */
+                $columnName=substr($summaryCode, 1);
+            }else{
+                $columnName=$summaryCode;
+            }
+            if(isset($fieldmap[$columnName]) && in_array($fieldmap[$columnName]['type'],$this->aLectraQuestionType))
+            {
+                if(!isset($question[$fieldmap[$columnName]['qid']]))
+                {
+                    $question[$fieldmap[$columnName]['qid']]=array();
+                }
+                $question[$fieldmap[$columnName]['qid']][]=$columnName;
+            }
+        }
+    }
 }

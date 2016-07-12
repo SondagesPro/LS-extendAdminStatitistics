@@ -680,8 +680,11 @@ class adminStatisticsController extends statistics {
 
         // ----------------------------------- END FILTER FORM ---------------------------------------
 
-        Yii::app()->loadHelper('admin/statistics');
-        $helper = new statistics_helper();
+        //~ Yii::app()->loadHelper('admin/statistics');
+        //~ $helper = new statistics_helper();
+        Yii::import("extendAdminStatitistics.helpers.statisticsHelper");
+        Yii::import("extendAdminStatitistics.helpers.statisticsLectraHelper");
+        $helper=new statisticsHelper;
         $showtextinline=isset($_POST['showtextinline']) ? 1 : 0;
         $aData['showtextinline'] = $showtextinline;
 
