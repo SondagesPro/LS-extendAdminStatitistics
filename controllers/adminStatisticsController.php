@@ -46,6 +46,10 @@ class adminStatisticsController extends statistics {
                 $this->graph($surveyid);
                 Yii::app()->end();
                 break;
+            case 'setIncompleteanswers':
+                $this->setIncompleteanswers();
+                Yii::app()->end();
+                break;
             default:
                 $this->run($surveyid, $params['sa']);
                 Yii::app()->end();
