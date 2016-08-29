@@ -109,7 +109,15 @@ class statisticsLectraHelper
     if($sType=="html")
     {
       $assetUrl = Yii::app()->assetManager->publish(dirname(__FILE__) . '/../assets/');
-      App()->getClientScript()->registerScriptFile(App()->getConfig('adminscripts').'Chart.min.js');
+      if(App()->getConfig('debug'))
+      {
+        App()->getClientScript()->registerScriptFile(App()->getConfig('adminscripts').'Chart.min.js');
+      }
+      else
+      {
+        App()->getClientScript()->registerScriptFile(Yii::app()->assetManager->publish(App()->getConfig('publicdir').DIRECTORY_SEPARATOR."scripts".DIRECTORY_SEPARATOR."admin") . '/Chart.min.js');
+      }
+
       App()->getClientScript()->registerScriptFile(Yii::app()->assetManager->publish(dirname(__FILE__) . '/../assets/Chart.StackedBar.js'));
       App()->getClientScript()->registerScriptFile(Yii::app()->assetManager->publish(dirname(__FILE__) . '/../assets/jquery.lazyload-any.js'));
 
