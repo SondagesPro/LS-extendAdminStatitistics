@@ -183,7 +183,6 @@ class statisticsLectraHelper
   {
     $oQuestion=Question::model()->find("qid=:qid AND language=:language",array(':qid'=>$iQid,":language"=>$this->sLanguage));
     $this->iQid=$iQid;
-    $this->aRenderData['oQuestion']=$oQuestion;
     if(in_array($oQuestion->type,$this->aSimpleArrayStat))
     {
         //return $this->getSimpleArrayStat($iQid,$aColumns,$aCoreAnswers);
@@ -302,7 +301,81 @@ class statisticsLectraHelper
     {
       return App()->getConfig("tempdir").'/'.$moreDataThanAllowed;
     }
+    $aSubQuestions=$this->aRenderData['aSubQuestions'];
+    $aStatData=$this->aRenderData['aStatData'];
+    $aAnswers=$this->aRenderData['aAnswers'];
+    unset($aAnswers['null_value']);
 
+    $DataSet = new pData;
+    foreach($aSubQuestions as $sTitle=>$sText)
+    {
+      $aData=array();
+      foreach($aAnswers as $kAnswer=>$aAnswer)
+      {
+
+        $aData[]=$aStatData[$sTitle][$kAnswer];
+      }
+      $DataSet->AddPoint($aData,$sTitle);
+    }
+    $aData=array();
+    foreach($aAnswers as $kAnswer=>$aAnswer)
+    {
+
+      $aData[]=html_entity_decode($aAnswer['text'],null,'UTF-8');
+    }
+    $DataSet->AddPoint($aData,"LabelSeries");
+    //~ foreach($aSubQuestions as $sTitle=>$sText)
+    //~ {
+      //~ $DataSet->AddSerie($sTitle);
+    //~ }
+    $DataSet->AddAllSeries();
+    $DataSet->SetAbsciseLabelSerie("LabelSeries");
+    $DataSet->RemoveSerie("LabelSeries");
+    foreach($aSubQuestions as $sTitle=>$sText)
+    {
+      $DataSet->SetSerieName(html_entity_decode($sText,null,'UTF-8'),$sTitle);
+    }
+    if ($this->pChartCache->IsInCache("graph".$this->iSurveyId.$this->sLanguage.$this->iQid,$DataSet->GetData()) && Yii::app()->getConfig('debug')<2)
+    {
+        //~ $cachefilename=basename($this->pChartCache->GetFileFromCache("graph".$this->iSurveyId.$this->sLanguage.$this->iQid,$DataSet->GetData()));
+    }
+    else
+    {
+      $admintheme = Yii::app()->getConfig("admintheme");
+      $rootdir=$this->apChartData['rootdir'];
+      $chartfontfile=$this->apChartData['chartfontfile'];
+      $chartfontsize=$this->apChartData['chartfontsize'];
+      $homedir=$this->apChartData['homedir'];
+
+
+      $graph = new pChart(1,1);
+      $graph->setFontProperties($this->apChartData['rootdir'].DIRECTORY_SEPARATOR.'fonts'.DIRECTORY_SEPARATOR.$this->apChartData['chartfontfile'],$this->apChartData['chartfontsize']);
+      $legendsize=$graph->getLegendBoxSize($DataSet->GetDataDescription());
+      if ($legendsize[1]<320) $gheight=420; else $gheight=$legendsize[1]+100;
+      $graph = new pChart(690+$legendsize[0],$gheight);
+      $graph->drawFilledRectangle(0,0,690+$legendsize[0],$gheight,254,254,254,false);
+      $graph->loadColorPalette($homedir.DIRECTORY_SEPARATOR.'styles'.DIRECTORY_SEPARATOR.$admintheme.DIRECTORY_SEPARATOR.'images/limesurvey.pal');
+      $graph->setFontProperties($rootdir.DIRECTORY_SEPARATOR.'fonts'.DIRECTORY_SEPARATOR.$chartfontfile,$chartfontsize);
+      $graph->setGraphArea(50,30,500,$gheight-60);
+      $graph->drawFilledRoundedRectangle(7,7,523+$legendsize[0],$gheight-7,5,254,255,254);
+      $graph->drawRoundedRectangle(5,5,525+$legendsize[0],$gheight-5,5,230,230,230);
+      $graph->drawGraphArea(254,254,254,TRUE);
+      $graph->drawScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_ADDALLSTART0,150,150,150,TRUE,30,0,TRUE,1,false);
+      $graph->drawGrid(4,TRUE,230,230,230,50);
+      // Draw the 0 line
+      $graph->setFontProperties($rootdir.DIRECTORY_SEPARATOR.'fonts'.DIRECTORY_SEPARATOR.$chartfontfile,$chartfontsize);
+      $graph->drawTreshold(0,143,55,72,TRUE,TRUE);
+
+      $graph->drawStackedBarGraph($DataSet->GetData(),$DataSet->GetDataDescription(),TRUE);
+      $graph->setFontProperties($rootdir.DIRECTORY_SEPARATOR.'fonts'.DIRECTORY_SEPARATOR.$chartfontfile, $chartfontsize);
+      $graph->drawLegend(510,30,$DataSet->GetDataDescription(),250,250,250);
+
+      $this->pChartCache->WriteToCache("graph".$this->iSurveyId.$this->sLanguage.$this->iQid,$DataSet->GetData(),$graph);
+      //~ $cachefilename=basename($cache->GetFileFromCache("graph".$this->iSurveyId.$this->sLanguage.$this->iQid,$DataSet->GetData()));
+      unset($graph);
+    }
+
+    return App()->getConfig("tempdir").'/'.basename($this->pChartCache->GetFileFromCache("graph".$this->iSurveyId.$this->sLanguage.$this->iQid,$DataSet->GetData()));
   }
 
   /**
@@ -311,7 +384,7 @@ class statisticsLectraHelper
   private function getMoreDataThanAllowed()
   {
 
-    if (true || count($this->aRenderData['aSubQuestions'])>30)
+    if (count($this->aRenderData['aSubQuestions'])>20)
     {
         $DataSet = array(1=>array(1=>1));
         if ($this->pChartCache->IsInCache("graph".$this->iSurveyId.$this->sLanguage.$this->iQid,$DataSet))
