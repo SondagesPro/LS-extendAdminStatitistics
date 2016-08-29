@@ -1,9 +1,28 @@
+/*
 .stackedbar-legend,
-.bar-legend {
+.bar-legend,
+.radar-legend,
+.line-legend{
 list-style: outside none none;
 }
+
 .stackedbar-legend span,
-.bar-legend span{
+.bar-legend span,
+.radar-legend span,
+.line-legend span{
+    display:inline-block;
+    border-radius: 0.2em;
+    height: 1em;
+    margin: 0.1em;
+    padding: 0;
+    width: 1em;
+}
+*/
+
+.legend ul{
+    list-style: outside none none;
+}
+.legend ul li span{
     display:inline-block;
     border-radius: 0.2em;
     height: 1em;
