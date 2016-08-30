@@ -8,6 +8,7 @@ Starting point to replace admin statitics in LimeSurvey.
 - Licence : GNU General Public License <https://www.gnu.org/licenses/gpl-3.0.html>
 
 ## History
+- [2016-08-29] 0.2.1 : Readding losted statisticsHelper
 - [2016-08-29] 0.2.0 : Add the graph in PDF
 - [2016-08-29] 0.1.3 : Fix if debug mode is unset
 - [2016-08-29] 0.1.2 : Update for css legend
