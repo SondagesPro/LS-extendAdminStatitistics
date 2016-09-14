@@ -1,6 +1,9 @@
 # extendAdminStatitics #
 
-Starting point to replace admin statitics in LimeSurvey.
+Replace admin statitics in LimeSurvey with :
+
+1. Show multiple question in same table and graph.
+
 
 ## Copyright
 - Copyright © 2016 Denis Chenu <http://sondages.pro>
