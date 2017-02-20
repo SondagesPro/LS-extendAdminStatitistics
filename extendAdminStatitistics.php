@@ -17,7 +17,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-class extendAdminStatitistics extends PluginBase
+class extendAdminStatitistics extends \ls\pluginmanager\PluginBase
 {
 
   protected $storage = 'DbStorage';
